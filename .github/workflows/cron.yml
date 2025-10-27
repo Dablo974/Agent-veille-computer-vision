@@ -1,0 +1,22 @@
+name: Vision Watcher
+
+on:
+  schedule:
+    - cron: "0 8 * * *"  # tous les jours à 8h UTC
+  workflow_dispatch:      # permet aussi de le lancer manuellement
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install feedparser requests
+      - name: Run script
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python vision_watcher.py

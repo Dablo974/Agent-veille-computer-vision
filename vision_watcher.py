@@ -33,11 +33,26 @@ def make_summary(entries):
     return message
 
 # === 4️⃣ ENVOI SUR DISCORD ===
-def send_to_discord(content):
-    #requests.post(DISCORD_WEBHOOK, json={"content": content})
-    data = {"content": "👋 Test du webhook Discord depuis GitHub Actions"}
-    res = requests.post(os.getenv("DISCORD_WEBHOOK"), json=data)
-    print("Code retour Discord:", res.status_code, res.text)
+def send_to_discord(message):
+    webhook = os.getenv("DISCORD_WEBHOOK")
+    if not webhook:
+        print("❌ Aucun webhook Discord trouvé.")
+        return
+
+    if not message.strip():
+        print("⚠️ Message vide, rien à envoyer.")
+        return
+
+    if len(message) > 1900:
+        message = message[:1900] + "… (tronqué)"
+
+    res = requests.post(webhook, json={"content": message})
+    print(f"↩️ Code retour Discord: {res.status_code}")
+    if res.status_code == 204:
+        print("✅ Rapport envoyé sur Discord.")
+    else:
+        print("⚠️ Erreur Discord:", res.text)
+
 
 # === 5️⃣ PIPELINE PRINCIPALE ===
 def main():

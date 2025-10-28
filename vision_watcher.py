@@ -10,16 +10,21 @@ client = InferenceClient("facebook/bart-large-cnn", token=HF_TOKEN)
 
 def summarize_text(text):
     try:
-        summary = client.summarization(text, max_length=200, min_length=50)
-        # L’API renvoie parfois une liste de dictionnaires ou une string selon le backend
-        if isinstance(summary, list):
+        summary = client.summarization(
+            text,
+            parameters={"max_new_tokens": 150, "min_length": 50, "temperature": 0.7}
+        )
+        # Le résultat peut être sous forme de liste ou de dict selon le backend
+        if isinstance(summary, list) and "summary_text" in summary[0]:
             return summary[0]["summary_text"]
         elif isinstance(summary, dict) and "summary_text" in summary:
             return summary["summary_text"]
-        return str(summary)
+        else:
+            return str(summary)
     except Exception as e:
         print("⚠️ Erreur résumé:", e)
         return text[:300] + "..."
+
 
 # === 1️⃣ PARAMÈTRES ===
 QUERY = "computer vision"

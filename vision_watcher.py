@@ -2,7 +2,22 @@
 import feedparser
 import requests
 from datetime import datetime
-import os
+from huggingface_hub import InferenceClient
+import feedparser, os, requests
+
+HF_TOKEN = os.getenv("HF_TOKEN")
+client = InferenceClient("facebook/bart-large-cnn", token=HF_TOKEN)
+
+def summarize_text(text):
+    try:
+        summary = client.text_generation(
+            prompt=f"Summarize this scientific abstract in 3 sentences:\n{text}",
+            max_new_tokens=200,
+        )
+        return summary
+    except Exception as e:
+        print("⚠️ Erreur résumé:", e)
+        return text[:300] + "..."
 
 # === 1️⃣ PARAMÈTRES ===
 QUERY = "computer vision"
@@ -10,17 +25,19 @@ MAX_RESULTS = 5
 DISCORD_WEBHOOK = "https://discordapp.com/api/webhooks/1432377669961519265/PL-ANiNzsaCFWHfVTNIeOWQkE-4ifzhnrrV6vfdtHDVGxd0Htr2zA0QJiDx1yvg32ikD"
 
 # === 2️⃣ RÉCUPÉRATION DES ARTICLES ARXIV ===
-def fetch_arxiv(query=QUERY, max_results=MAX_RESULTS):
-    base_url = "http://export.arxiv.org/api/query?search_query=all:{}&sortBy=submittedDate&sortOrder=descending&max_results={}"
-    feed = feedparser.parse(base_url.format(query.replace(" ", "+"), max_results))
-    results = []
-    for entry in feed.entries:
-        results.append({
-            "title": entry.title,
-            "url": entry.link,
-            "summary": entry.summary[:300] + "..."
+def fetch_arxiv(query="computer vision", max_results=5):
+    base_url = f"http://export.arxiv.org/api/query?search_query=all:{query.replace(' ','+')}&sortBy=submittedDate&sortOrder=descending&max_results={max_results}"
+    feed = feedparser.parse(base_url)
+    entries = []
+    for e in feed.entries:
+        summary = summarize_text(e.summary)
+        entries.append({
+            "title": e.title,
+            "summary": summary.strip(),
+            "url": e.link
         })
-    return results
+    return entries
+
 
 # === 3️⃣ GÉNÉRATION DU MESSAGE ===
 def make_summary(entries):

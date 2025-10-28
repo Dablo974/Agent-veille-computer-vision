@@ -6,10 +6,15 @@ from huggingface_hub import InferenceClient
 import feedparser, os, requests
 
 HF_TOKEN = os.getenv("HF_TOKEN")
-client = InferenceClient("facebook/bart-large-cnn", token=HF_TOKEN)
+USE_HF = bool(HF_TOKEN)
+SUMMARY_ERROR_LOGGED = False
+client = InferenceClient("facebook/bart-large-cnn", token=HF_TOKEN) if USE_HF else None
 
 def summarize_text(text):
     try:
+        if not USE_HF or client is None:
+            return (text or "")[:300] + "..."
+
         summary = client.summarization(text)
         # Le résultat peut être sous forme de liste ou de dict selon le backend
         if isinstance(summary, list) and "summary_text" in summary[0]:
@@ -21,8 +26,12 @@ def summarize_text(text):
         else:
             return str(summary)
     except Exception as e:
-        print("⚠️ Erreur résumé:", e)
-        return text[:300] + "..."
+        global SUMMARY_ERROR_LOGGED
+        if not SUMMARY_ERROR_LOGGED:
+            print("⚠️ Résumé désactivé (HF Inference indisponible). Cause:", e)
+            print("ℹ️ Astuce: définissez la variable d'environnement HF_TOKEN avec un jeton Hugging Face valide.")
+            SUMMARY_ERROR_LOGGED = True
+        return (text or "")[:300] + "..."
 
 
 # === 1️⃣ PARAMÈTRES ===

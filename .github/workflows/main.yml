@@ -19,4 +19,5 @@ jobs:
       - name: Run script
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python vision_watcher.py

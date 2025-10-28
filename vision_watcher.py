@@ -12,7 +12,9 @@ def summarize_text(text):
     try:
         summary = client.summarization(
             text,
-            parameters={"max_new_tokens": 150, "min_length": 50, "temperature": 0.7}
+            max_new_tokens=150,
+            min_length=50,
+            temperature=0.7,
         )
         # Le résultat peut être sous forme de liste ou de dict selon le backend
         if isinstance(summary, list) and "summary_text" in summary[0]:
@@ -83,7 +85,6 @@ def main():
     entries = fetch_arxiv()
     summary = make_summary(entries)
     send_to_discord(summary)
-    print("✅ Rapport envoyé sur Discord.")
 
 if __name__ == "__main__":
     main()

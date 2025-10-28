@@ -10,11 +10,13 @@ client = InferenceClient("facebook/bart-large-cnn", token=HF_TOKEN)
 
 def summarize_text(text):
     try:
-        summary = client.text_generation(
-            prompt=f"Summarize this scientific abstract in 3 sentences:\n{text}",
-            max_new_tokens=200,
-        )
-        return summary
+        summary = client.summarization(text, max_length=200, min_length=50)
+        # L’API renvoie parfois une liste de dictionnaires ou une string selon le backend
+        if isinstance(summary, list):
+            return summary[0]["summary_text"]
+        elif isinstance(summary, dict) and "summary_text" in summary:
+            return summary["summary_text"]
+        return str(summary)
     except Exception as e:
         print("⚠️ Erreur résumé:", e)
         return text[:300] + "..."

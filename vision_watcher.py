@@ -10,17 +10,14 @@ client = InferenceClient("facebook/bart-large-cnn", token=HF_TOKEN)
 
 def summarize_text(text):
     try:
-        summary = client.summarization(
-            text,
-            max_new_tokens=150,
-            min_length=50,
-            temperature=0.7,
-        )
+        summary = client.summarization(text)
         # Le résultat peut être sous forme de liste ou de dict selon le backend
         if isinstance(summary, list) and "summary_text" in summary[0]:
             return summary[0]["summary_text"]
         elif isinstance(summary, dict) and "summary_text" in summary:
             return summary["summary_text"]
+        elif isinstance(summary, str):
+            return summary
         else:
             return str(summary)
     except Exception as e:

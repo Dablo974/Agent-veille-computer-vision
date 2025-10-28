@@ -2,6 +2,7 @@
 import feedparser
 import requests
 from datetime import datetime
+import os
 
 # === 1️⃣ PARAMÈTRES ===
 QUERY = "computer vision"

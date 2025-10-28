@@ -60,7 +60,6 @@ def main():
     summary = make_summary(entries)
     send_to_discord(summary)
     print("✅ Rapport envoyé sur Discord.")
-    print(message[:500])
 
 if __name__ == "__main__":
     main()

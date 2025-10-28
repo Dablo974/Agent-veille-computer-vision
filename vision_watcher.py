@@ -33,7 +33,10 @@ def make_summary(entries):
 
 # === 4️⃣ ENVOI SUR DISCORD ===
 def send_to_discord(content):
-    requests.post(DISCORD_WEBHOOK, json={"content": content})
+    #requests.post(DISCORD_WEBHOOK, json={"content": content})
+    data = {"content": "👋 Test du webhook Discord depuis GitHub Actions"}
+    res = requests.post(os.getenv("DISCORD_WEBHOOK"), json=data)
+    print("Code retour Discord:", res.status_code, res.text)
 
 # === 5️⃣ PIPELINE PRINCIPALE ===
 def main():
